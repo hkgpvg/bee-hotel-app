@@ -13,10 +13,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         allData = await response.json();
         
         // Parse dates
-        allData = allData.map(record => ({
-            ...record,
-            parsedDate: parseDate(record.Date, record.Time)
-        })).filter(r => r.parsedDate !== null);
+        allData = allData.map(record => {
+            const parsedDate = parseDate(record.Date, record.Time);
+            return {
+                ...record,
+                parsedDate: parsedDate,
+                // Format date for display (handles both DD/MM/YYYY and Unix timestamps)
+                formattedDate: parsedDate 
+                    ? `${String(parsedDate.getDate()).padStart(2, '0')}/${String(parsedDate.getMonth() + 1).padStart(2, '0')}/${parsedDate.getFullYear()}`
+                    : record.Date
+            };
+        }).filter(r => r.parsedDate !== null);
         
         // Sort newest first
         allData.sort((a, b) => b.parsedDate - a.parsedDate);
@@ -38,16 +45,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function parseDate(dateStr, timeStr) {
     try {
-        const parts = dateStr.split('/');
-        if (parts.length !== 3) return null;
-        const day = parseInt(parts[0]);
-        const month = parseInt(parts[1]) - 1;
-        const year = parseInt(parts[2]);
-        const date = new Date(year, month, day);
-        if (timeStr) {
+        let date;
+        
+        // Handle Unix timestamp (number)
+        if (typeof dateStr === 'number' || (typeof dateStr === 'string' && /^\d+$/.test(dateStr))) {
+            const timestamp = parseInt(dateStr);
+            date = new Date(timestamp);
+        } 
+        // Handle DD/MM/YYYY format
+        else if (typeof dateStr === 'string' && dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1;
+            const year = parseInt(parts[2]);
+            date = new Date(year, month, day);
+        } 
+        else {
+            return null;
+        }
+        
+        // Add time if provided
+        if (timeStr && date instanceof Date && !isNaN(date)) {
             const [h, m, s] = timeStr.split(':');
             date.setHours(parseInt(h), parseInt(m), parseInt(s) || 0);
         }
+        
         return date;
     } catch (e) {
         return null;
@@ -242,7 +265,7 @@ function updateCurrentStatus() {
         (latest['Fan Status'] === 'ON' ? 'on' : 'off');
     
     document.getElementById('lastUpdate').innerHTML = 
-        `<div>${latest.Date}</div><div>${latest.Time}</div>`;
+        `<div>${latest.formattedDate}</div><div>${latest.Time}</div>`;
     
     // Summary stats
     document.getElementById('totalRecords').textContent = filteredData.length.toLocaleString();
@@ -442,7 +465,7 @@ function updateAlertLog() {
     const display = alerts.slice(0, 100);
     tbody.innerHTML = display.map(a => `
         <tr>
-            <td>${a.Date}</td>
+            <td>${a.formattedDate}</td>
             <td>${a.Time}</td>
             <td style="color:#e53e3e;font-weight:700;">⚠ ALERT</td>
             <td>${a['Indoor Temp (C)']?.toFixed(1)}°C</td>
@@ -474,7 +497,7 @@ function updateDataTable() {
     } else {
         tbody.innerHTML = pageData.map(r => `
             <tr>
-                <td>${r.Date}</td>
+                <td>${r.formattedDate}</td>
                 <td>${r.Time}</td>
                 <td>${r['Indoor Temp (C)']?.toFixed(1)}°C</td>
                 <td>${r['Outdoor Temp (C)']?.toFixed(1)}°C</td>
