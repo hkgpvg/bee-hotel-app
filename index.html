@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bee Hotel Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐝 Bee Hotel Monitoring Dashboard</h1>
+            <div class="controls">
+                <label>Date Range:</label>
+                <input type="date" id="startDate">
+                <span>to</span>
+                <input type="date" id="endDate">
+                <button id="applyFilter">Apply</button>
+                <button id="resetFilter">Reset</button>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <!-- Panel 1: Current Status -->
+            <section class="panel panel-current">
+                <h2>Current Status</h2>
+                <div class="current-metrics">
+                    <div class="metric-card">
+                        <div class="metric-label">Indoor Temp</div>
+                        <div class="metric-value" id="currentIndoorTemp">--</div>
+                        <div class="metric-unit">°C</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Outdoor Temp</div>
+                        <div class="metric-value" id="currentOutdoorTemp">--</div>
+                        <div class="metric-unit">°C</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Indoor Humidity</div>
+                        <div class="metric-value" id="currentIndoorHumidity">--</div>
+                        <div class="metric-unit">%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Outdoor Humidity</div>
+                        <div class="metric-value" id="currentOutdoorHumidity">--</div>
+                        <div class="metric-unit">%</div>
+                    </div>
+                    <div class="metric-card fan-status">
+                        <div class="metric-label">Fan Status</div>
+                        <div class="metric-value status-indicator" id="currentFanStatus">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Last Update</div>
+                        <div class="metric-value small" id="lastUpdate">--</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel 2: Temperature Trends -->
+            <section class="panel panel-chart">
+                <h2>Temperature Trends</h2>
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Panel 3: Humidity Trends -->
+            <section class="panel panel-chart">
+                <h2>Humidity Trends</h2>
+                <div class="chart-container">
+                    <canvas id="humidityChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Panel 4: Fan Status Timeline -->
+            <section class="panel panel-chart">
+                <h2>Fan Status Timeline</h2>
+                <div class="chart-container">
+                    <canvas id="fanChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Panel 5: Alert Log -->
+            <section class="panel panel-alerts">
+                <h2>Alert Log</h2>
+                <div class="alert-summary">
+                    <div class="alert-stat">
+                        <span class="stat-label">Total Alerts:</span>
+                        <span class="stat-value" id="totalAlerts">0</span>
+                    </div>
+                    <div class="alert-stat">
+                        <span class="stat-label">Alert Rate:</span>
+                        <span class="stat-value" id="alertRate">0%</span>
+                    </div>
+                </div>
+                <div class="alert-table-container">
+                    <table class="alert-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Indoor Temp</th>
+                                <th>Outdoor Temp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertTableBody">
+                            <tr><td colspan="5">No alerts</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Panel 6: Data Explorer -->
+            <section class="panel panel-data">
+                <h2>Data Explorer</h2>
+                <div class="data-controls">
+                    <input type="text" id="searchInput" placeholder="Search records...">
+                    <select id="recordsPerPage">
+                        <option value="10">10 records</option>
+                        <option value="25">25 records</option>
+                        <option value="50">50 records</option>
+                        <option value="100">100 records</option>
+                    </select>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Indoor Temp</th>
+                                <th>Outdoor Temp</th>
+                                <th>Indoor Humidity</th>
+                                <th>Outdoor Humidity</th>
+                                <th>Fan</th>
+                                <th>Alert</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <tr><td colspan="8">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prevPage">Previous</button>
+                    <span id="pageInfo">Page 1</span>
+                    <button id="nextPage">Next</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
