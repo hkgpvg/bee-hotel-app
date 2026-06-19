@@ -166,48 +166,61 @@ function applyPreset(preset) {
         btn.classList.toggle('active', btn.dataset.preset === preset);
     });
     
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    const todayStart = new Date(today);
-    todayStart.setHours(0, 0, 0, 0);
+    // Use data's own date range as reference (not today's date)
+    const dataDates = allData.map(r => r.parsedDate);
+    const dataMax = new Date(Math.max(...dataDates));
+    const dataMin = new Date(Math.min(...dataDates));
     
     let start, end;
     
     switch (preset) {
         case 'today':
-            start = new Date(todayStart);
-            end = new Date(today);
+            // Last day of available data
+            end = new Date(dataMax);
+            end.setHours(23, 59, 59, 999);
+            start = new Date(dataMax);
+            start.setHours(0, 0, 0, 0);
             break;
         case 'yesterday':
-            end = new Date(todayStart);
+            // Second-to-last day of available data
+            end = new Date(dataMax);
+            end.setHours(0, 0, 0, 0);
             end.setSeconds(-1);
             start = new Date(end);
             start.setHours(0, 0, 0, 0);
             break;
         case 'week':
-            start = new Date(today);
+            // Last 7 days of available data
+            end = new Date(dataMax);
+            end.setHours(23, 59, 59, 999);
+            start = new Date(dataMax);
             start.setDate(start.getDate() - 6);
             start.setHours(0, 0, 0, 0);
-            end = new Date(today);
+            // Don't go before data start
+            if (start < dataMin) start = new Date(dataMin);
             break;
         case 'month':
-            start = new Date(today);
+            // Last 30 days of available data
+            end = new Date(dataMax);
+            end.setHours(23, 59, 59, 999);
+            start = new Date(dataMax);
             start.setDate(start.getDate() - 29);
             start.setHours(0, 0, 0, 0);
-            end = new Date(today);
+            if (start < dataMin) start = new Date(dataMin);
             break;
         case 'quarter':
-            start = new Date(today);
+            // Last 90 days of available data
+            end = new Date(dataMax);
+            end.setHours(23, 59, 59, 999);
+            start = new Date(dataMax);
             start.setDate(start.getDate() - 89);
             start.setHours(0, 0, 0, 0);
-            end = new Date(today);
+            if (start < dataMin) start = new Date(dataMin);
             break;
         case 'all':
         default:
-            // Use actual data range
-            const dates = allData.map(r => r.parsedDate);
-            start = new Date(Math.min(...dates));
-            end = new Date(Math.max(...dates));
+            start = new Date(dataMin);
+            end = new Date(dataMax);
             end.setHours(23, 59, 59);
             break;
     }
