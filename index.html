@@ -9,90 +9,167 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🐝 Bee Hotel Monitoring Dashboard</h1>
-            <div class="controls">
-                <label>Date Range:</label>
-                <input type="date" id="startDate">
-                <span>to</span>
-                <input type="date" id="endDate">
-                <button id="applyFilter">Apply</button>
-                <button id="resetFilter">Reset</button>
-            </div>
+    <div class="app">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🐝 Bee Hotel Dashboard</h1>
+            <div class="version">v1.1.0</div>
         </header>
 
-        <main class="dashboard-grid">
-            <!-- Panel 1: Current Status -->
-            <section class="panel panel-current">
+        <!-- Date Range Bar -->
+        <section class="date-bar">
+            <div class="quick-presets">
+                <button class="preset-btn" data-preset="today">Today</button>
+                <button class="preset-btn" data-preset="yesterday">Yesterday</button>
+                <button class="preset-btn" data-preset="week">Last 7 Days</button>
+                <button class="preset-btn" data-preset="month">Last 30 Days</button>
+                <button class="preset-btn" data-preset="quarter">Last 90 Days</button>
+                <button class="preset-btn active" data-preset="all">All Data</button>
+            </div>
+            <div class="custom-range">
+                <label>Custom:</label>
+                <input type="date" id="startDate">
+                <span>→</span>
+                <input type="date" id="endDate">
+                <button id="applyFilter" class="btn-apply">Apply</button>
+            </div>
+            <div class="range-info" id="rangeInfo">Showing all data</div>
+        </section>
+
+        <!-- Main Content Area (Tabs) -->
+        <main class="tab-content">
+            <!-- Tab 1: Current Status -->
+            <section class="tab-panel active" data-tab="status">
                 <h2>Current Status</h2>
                 <div class="current-metrics">
-                    <div class="metric-card">
+                    <div class="metric-card temp-card">
+                        <div class="metric-icon">🌡️</div>
                         <div class="metric-label">Indoor Temp</div>
                         <div class="metric-value" id="currentIndoorTemp">--</div>
                         <div class="metric-unit">°C</div>
                     </div>
-                    <div class="metric-card">
+                    <div class="metric-card temp-card">
+                        <div class="metric-icon">🌡️</div>
                         <div class="metric-label">Outdoor Temp</div>
                         <div class="metric-value" id="currentOutdoorTemp">--</div>
                         <div class="metric-unit">°C</div>
                     </div>
-                    <div class="metric-card">
+                    <div class="metric-card humidity-card">
+                        <div class="metric-icon">💧</div>
                         <div class="metric-label">Indoor Humidity</div>
                         <div class="metric-value" id="currentIndoorHumidity">--</div>
                         <div class="metric-unit">%</div>
                     </div>
-                    <div class="metric-card">
+                    <div class="metric-card humidity-card">
+                        <div class="metric-icon">💧</div>
                         <div class="metric-label">Outdoor Humidity</div>
                         <div class="metric-value" id="currentOutdoorHumidity">--</div>
                         <div class="metric-unit">%</div>
                     </div>
-                    <div class="metric-card fan-status">
+                    <div class="metric-card fan-card">
+                        <div class="metric-icon">🌀</div>
                         <div class="metric-label">Fan Status</div>
                         <div class="metric-value status-indicator" id="currentFanStatus">--</div>
                     </div>
-                    <div class="metric-card">
+                    <div class="metric-card update-card">
+                        <div class="metric-icon">🕐</div>
                         <div class="metric-label">Last Update</div>
                         <div class="metric-value small" id="lastUpdate">--</div>
                     </div>
                 </div>
+                <div class="summary-stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalRecords">--</div>
+                        <div class="stat-label">Total Records</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="dateRange">--</div>
+                        <div class="stat-label">Date Range</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="avgIndoorTemp">--</div>
+                        <div class="stat-label">Avg Indoor Temp</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="avgOutdoorTemp">--</div>
+                        <div class="stat-label">Avg Outdoor Temp</div>
+                    </div>
+                </div>
             </section>
 
-            <!-- Panel 2: Temperature Trends -->
-            <section class="panel panel-chart">
+            <!-- Tab 2: Temperature Trends -->
+            <section class="tab-panel" data-tab="temp">
                 <h2>Temperature Trends</h2>
-                <div class="chart-container">
+                <div class="chart-container large">
                     <canvas id="tempChart"></canvas>
                 </div>
+                <div class="chart-stats">
+                    <div class="chart-stat">
+                        <span class="stat-dot red"></span>
+                        <span>Indoor: Min <b id="tempIndoorMin">--</b>°C / Max <b id="tempIndoorMax">--</b>°C / Avg <b id="tempIndoorAvg">--</b>°C</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="stat-dot blue"></span>
+                        <span>Outdoor: Min <b id="tempOutdoorMin">--</b>°C / Max <b id="tempOutdoorMax">--</b>°C / Avg <b id="tempOutdoorAvg">--</b>°C</span>
+                    </div>
+                </div>
             </section>
 
-            <!-- Panel 3: Humidity Trends -->
-            <section class="panel panel-chart">
+            <!-- Tab 3: Humidity Trends -->
+            <section class="tab-panel" data-tab="humidity">
                 <h2>Humidity Trends</h2>
-                <div class="chart-container">
+                <div class="chart-container large">
                     <canvas id="humidityChart"></canvas>
                 </div>
-            </section>
-
-            <!-- Panel 4: Fan Status Timeline -->
-            <section class="panel panel-chart">
-                <h2>Fan Status Timeline</h2>
-                <div class="chart-container">
-                    <canvas id="fanChart"></canvas>
+                <div class="chart-stats">
+                    <div class="chart-stat">
+                        <span class="stat-dot green"></span>
+                        <span>Indoor: Min <b id="humIndoorMin">--</b>% / Max <b id="humIndoorMax">--</b>% / Avg <b id="humIndoorAvg">--</b>%</span>
+                    </div>
+                    <div class="chart-stat">
+                        <span class="stat-dot orange"></span>
+                        <span>Outdoor: Min <b id="humOutdoorMin">--</b>% / Max <b id="humOutdoorMax">--</b>% / Avg <b id="humOutdoorAvg">--</b>%</span>
+                    </div>
                 </div>
             </section>
 
-            <!-- Panel 5: Alert Log -->
-            <section class="panel panel-alerts">
+            <!-- Tab 4: Fan Status -->
+            <section class="tab-panel" data-tab="fan">
+                <h2>Fan Status Timeline</h2>
+                <div class="chart-container large">
+                    <canvas id="fanChart"></canvas>
+                </div>
+                <div class="fan-summary">
+                    <div class="fan-stat">
+                        <div class="fan-stat-value" id="fanOnCount">--</div>
+                        <div class="fan-stat-label">ON Readings</div>
+                    </div>
+                    <div class="fan-stat">
+                        <div class="fan-stat-value" id="fanOffCount">--</div>
+                        <div class="fan-stat-label">OFF Readings</div>
+                    </div>
+                    <div class="fan-stat">
+                        <div class="fan-stat-value" id="fanOnPercent">--</div>
+                        <div class="fan-stat-label">ON Percentage</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 5: Alert Log -->
+            <section class="tab-panel" data-tab="alerts">
                 <h2>Alert Log</h2>
                 <div class="alert-summary">
-                    <div class="alert-stat">
-                        <span class="stat-label">Total Alerts:</span>
-                        <span class="stat-value" id="totalAlerts">0</span>
+                    <div class="alert-stat warning">
+                        <div class="alert-number" id="totalAlerts">0</div>
+                        <div class="alert-label">Total Alerts</div>
                     </div>
                     <div class="alert-stat">
-                        <span class="stat-label">Alert Rate:</span>
-                        <span class="stat-value" id="alertRate">0%</span>
+                        <div class="alert-number" id="alertRate">0%</div>
+                        <div class="alert-label">Alert Rate</div>
+                    </div>
+                    <div class="alert-stat">
+                        <div class="alert-number" id="noAlertCount">0</div>
+                        <div class="alert-label">Normal Readings</div>
                     </div>
                 </div>
                 <div class="alert-table-container">
@@ -104,25 +181,27 @@
                                 <th>Status</th>
                                 <th>Indoor Temp</th>
                                 <th>Outdoor Temp</th>
+                                <th>Indoor Humidity</th>
+                                <th>Fan</th>
                             </tr>
                         </thead>
                         <tbody id="alertTableBody">
-                            <tr><td colspan="5">No alerts</td></tr>
+                            <tr><td colspan="7">No alerts</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Panel 6: Data Explorer -->
-            <section class="panel panel-data">
+            <!-- Tab 6: Data Explorer -->
+            <section class="tab-panel" data-tab="data">
                 <h2>Data Explorer</h2>
                 <div class="data-controls">
-                    <input type="text" id="searchInput" placeholder="Search records...">
+                    <input type="text" id="searchInput" placeholder="🔍 Search records...">
                     <select id="recordsPerPage">
-                        <option value="10">10 records</option>
                         <option value="25">25 records</option>
                         <option value="50">50 records</option>
                         <option value="100">100 records</option>
+                        <option value="200">200 records</option>
                     </select>
                 </div>
                 <div class="data-table-container">
@@ -133,8 +212,8 @@
                                 <th>Time</th>
                                 <th>Indoor Temp</th>
                                 <th>Outdoor Temp</th>
-                                <th>Indoor Humidity</th>
-                                <th>Outdoor Humidity</th>
+                                <th>Indoor Hum</th>
+                                <th>Outdoor Hum</th>
                                 <th>Fan</th>
                                 <th>Alert</th>
                             </tr>
@@ -145,12 +224,40 @@
                     </table>
                 </div>
                 <div class="pagination">
-                    <button id="prevPage">Previous</button>
+                    <button id="prevPage">← Previous</button>
                     <span id="pageInfo">Page 1</span>
-                    <button id="nextPage">Next</button>
+                    <button id="nextPage">Next →</button>
                 </div>
             </section>
         </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="status">
+                <span class="nav-icon">🌡️</span>
+                <span class="nav-label">Status</span>
+            </button>
+            <button class="nav-btn" data-tab="temp">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Temp</span>
+            </button>
+            <button class="nav-btn" data-tab="humidity">
+                <span class="nav-icon">💧</span>
+                <span class="nav-label">Humidity</span>
+            </button>
+            <button class="nav-btn" data-tab="fan">
+                <span class="nav-icon">🌀</span>
+                <span class="nav-label">Fan</span>
+            </button>
+            <button class="nav-btn" data-tab="alerts">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-label">Alerts</span>
+            </button>
+            <button class="nav-btn" data-tab="data">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Data</span>
+            </button>
+        </nav>
     </div>
 
     <script src="app.js"></script>
