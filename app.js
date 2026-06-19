@@ -12,13 +12,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         const response = await fetch('bee_data.json');
         allData = await response.json();
         
-        // Parse dates
+        // Parse dates and fix swapped columns in Unix timestamp records
         allData = allData.map(record => {
             const parsedDate = parseDate(record.Date, record.Time);
+            
+            // Detect and fix swapped columns in Unix timestamp records
+            // Issue: "Indoor Temp (C)" contains humidity values, "Outdoor Humidity (%)" contains temp values
+            // Fix: swap these two columns when detected
+            const indoorTemp = record['Indoor Temp (C)'];
+            const outdoorHum = record['Outdoor Humidity (%)'];
+            
+            // If Indoor Temp > 50 (humidity range) and Outdoor Humidity < 40 (temp range), they're swapped
+            if (indoorTemp != null && indoorTemp > 50 && indoorTemp < 100 &&
+                outdoorHum != null && outdoorHum < 40 && outdoorHum > 10) {
+                // Swap them
+                record['Indoor Temp (C)'] = outdoorHum;
+                record['Outdoor Humidity (%)'] = indoorTemp;
+            }
+            
             return {
                 ...record,
                 parsedDate: parsedDate,
-                // Format date for display (handles both DD/MM/YYYY and Unix timestamps)
                 formattedDate: parsedDate 
                     ? `${String(parsedDate.getDate()).padStart(2, '0')}/${String(parsedDate.getMonth() + 1).padStart(2, '0')}/${parsedDate.getFullYear()}`
                     : record.Date
